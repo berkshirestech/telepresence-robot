@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+`make`
+
+require 'sshkit'
+require 'sshkit/dsl'
+
+server = ENV["SERVER"]
+unless server
+  puts 'Provide a server ip by setting SERVER'
+  exit
+end
+
+host = SSHKit::Host.new("root@#{server}")
+host.password = "root"
+
+on host do |host|
+  upload! File.dirname(__FILE__) + '/pi_setup.sh', '/root/pi_setup.sh'
+  puts capture 'sh /root/pi_setup.sh'
+end

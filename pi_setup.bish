@@ -1,0 +1,37 @@
+def exit_code(command) {
+  thecommand = command;
+  @($thecommand);
+}
+
+def command_exists(command) {
+  thecommand = command;
+  returned = exit_code("command -v $thecommand >/dev/null 2>&1");
+  if(returned == 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+def install_package(package) {
+  thepackage = package;
+  if (command_exists(thepackage) != true) {
+    @("pacman -S $thepackage --noconfirm");
+    println("Finished configuring Raspberry Pi");
+  } else {
+    println("wpa_supplicant already installed");
+  }
+}
+
+# Maybe openssh doesn't work out of the box, because the host keys weren't
+# generated properly. Obviously you need to put this on the server by hand then.
+#
+if ( (@(du -k /etc/ssh/ssh_host_key) | @(cut -f1)) == 0 ) {
+  @(pacman -Rsn openssh);
+  @(rm -rf /etc/ssh);
+  @(pacman -S openssh);
+  @(systemctl start sshd);
+  @(systemctl enable ssh);
+}
+
+install_package("wpa_supplicant");
